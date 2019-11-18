@@ -1,6 +1,6 @@
 /* eslint-env mocha */
 
-describe('ChromeLauncher', function () {
+describe('EdgeLauncher', function () {
   it('works', function () {
     return 1 + 1 === 2
   })

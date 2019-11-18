@@ -17,14 +17,14 @@ function sanitizeJSFlags (flag) {
   return flag.replace(startExp, '--js-flags=').replace(endExp, '')
 }
 
-var ChromeBrowser = function (baseBrowserDecorator, args) {
+var EdgeBrowser = function (baseBrowserDecorator, args) {
   baseBrowserDecorator(this)
 
   var flags = args.flags || []
-  var userDataDir = args.chromeDataDir || this._tempDir
+  var userDataDir = args.edgeDataDir || this._tempDir
 
   this._getOptions = function (url) {
-    // Chrome CLI options
+    // Edge CLI options
     // http://peter.sh/experiments/chromium-command-line-switches/
     flags.forEach(function (flag, i) {
       if (isJSFlags(flag)) {
@@ -51,33 +51,33 @@ var ChromeBrowser = function (baseBrowserDecorator, args) {
   }
 }
 
-// Return location of chrome.exe file for a given Chrome directory (available: "Chrome", "Chrome SxS").
-function getChromeExe (chromeDirName) {
+// Return location of edge.exe file for a given Edge directory (available: "Edge", "Edge SxS").
+function getEdgeExe (edgeDirName) {
   // Only run these checks on win32
   if (process.platform !== 'win32') {
     return null
   }
-  var windowsChromeDirectory, i, prefix
-  var suffix = '\\Google\\' + chromeDirName + '\\Application\\chrome.exe'
+  var windowsEdgeDirectory, i, prefix
+  var suffix = edgeDirName + '\\Application\\edge.exe'
   var prefixes = [process.env.LOCALAPPDATA, process.env.PROGRAMFILES, process.env['PROGRAMFILES(X86)']]
 
   for (i = 0; i < prefixes.length; i++) {
     prefix = prefixes[i]
     try {
-      windowsChromeDirectory = path.join(prefix, suffix)
-      fs.accessSync(windowsChromeDirectory)
-      return windowsChromeDirectory
+      windowsEdgeDirectory = path.join(prefix, suffix)
+      fs.accessSync(windowsEdgeDirectory)
+      return windowsEdgeDirectory
     } catch (e) {}
   }
 
-  return windowsChromeDirectory
+  return windowsEdgeDirectory
 }
 
 var ChromiumBrowser = function (baseBrowserDecorator, args) {
   baseBrowserDecorator(this)
 
   var flags = args.flags || []
-  var userDataDir = args.chromeDataDir || this._tempDir
+  var userDataDir = args.edgeDataDir || this._tempDir
 
   this._getOptions = function (url) {
     // Chromium CLI options
@@ -100,28 +100,6 @@ var ChromiumBrowser = function (baseBrowserDecorator, args) {
   }
 }
 
-// Return location of Chromium's chrome.exe file.
-function getChromiumExe (chromeDirName) {
-  // Only run these checks on win32
-  if (process.platform !== 'win32') {
-    return null
-  }
-  var windowsChromiumDirectory, i, prefix
-  var suffix = '\\Chromium\\Application\\chrome.exe'
-  var prefixes = [process.env.LOCALAPPDATA, process.env.PROGRAMFILES, process.env['PROGRAMFILES(X86)']]
-
-  for (i = 0; i < prefixes.length; i++) {
-    prefix = prefixes[i]
-    try {
-      windowsChromiumDirectory = path.join(prefix, suffix)
-      fs.accessSync(windowsChromiumDirectory)
-      return windowsChromiumDirectory
-    } catch (e) {}
-  }
-
-  return windowsChromiumDirectory
-}
-
 function getBin (commands) {
   // Don't run these checks on win32
   if (process.platform !== 'linux') {
@@ -139,7 +117,7 @@ function getBin (commands) {
   return bin
 }
 
-function getChromeDarwin (defaultPath) {
+function getEdgeDarwin (defaultPath) {
   if (process.platform !== 'darwin') {
     return null
   }
@@ -153,18 +131,18 @@ function getChromeDarwin (defaultPath) {
   }
 }
 
-ChromeBrowser.prototype = {
-  name: 'Chrome',
+EdgeBrowser.prototype = {
+  name: 'Edge',
 
   DEFAULT_CMD: {
-    linux: getBin(['google-chrome', 'google-chrome-stable']),
-    darwin: getChromeDarwin('/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'),
-    win32: getChromeExe('Chrome')
+    linux: getBin(['edge', 'edge-stable']),
+    darwin: getEdgeDarwin('/Applications/Microsoft Edge Beta.app/Contents/MacOS/Microsoft Edge Beta'),
+    win32: getEdgeExe('Edge')
   },
   ENV_CMD: 'CHROME_BIN'
 }
 
-ChromeBrowser.$inject = ['baseBrowserDecorator', 'args']
+EdgeBrowser.$inject = ['baseBrowserDecorator', 'args']
 
 function headlessGetOptions (url, args, parent) {
   var mergedArgs = parent.call(this, url, args).concat([
@@ -182,8 +160,8 @@ function headlessGetOptions (url, args, parent) {
     : mergedArgs.concat(['--remote-debugging-port=9222'])
 }
 
-var ChromeHeadlessBrowser = function (baseBrowserDecorator, args) {
-  ChromeBrowser.apply(this, arguments)
+var EdgeHeadlessBrowser = function (baseBrowserDecorator, args) {
+  EdgeBrowser.apply(this, arguments)
 
   var parentOptions = this._getOptions
   this._getOptions = function (url) {
@@ -191,21 +169,21 @@ var ChromeHeadlessBrowser = function (baseBrowserDecorator, args) {
   }
 }
 
-ChromeHeadlessBrowser.prototype = {
-  name: 'ChromeHeadless',
+EdgeHeadlessBrowser.prototype = {
+  name: 'EdgeHeadless',
 
   DEFAULT_CMD: {
-    linux: getBin(['google-chrome', 'google-chrome-stable']),
-    darwin: getChromeDarwin('/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'),
-    win32: getChromeExe('Chrome')
+    linux: getBin(['edge', 'edge-stable']),
+    darwin: getEdgeDarwin('/Applications/Microsoft Edge Beta.app/Contents/MacOS/Microsoft Edge Beta'),
+    win32: getEdgeExe('Edge')
   },
-  ENV_CMD: 'CHROME_BIN'
+  ENV_CMD: 'EDGE_BIN'
 }
 
-ChromeHeadlessBrowser.$inject = ['baseBrowserDecorator', 'args']
+EdgeHeadlessBrowser.$inject = ['baseBrowserDecorator', 'args']
 
 function canaryGetOptions (url, args, parent) {
-  // disable crankshaft optimizations, as it causes lot of memory leaks (as of Chrome 23.0)
+  // disable crankshaft optimizations, as it causes lot of memory leaks (as of Edge 23.0)
   var flags = args.flags || []
   var augmentedFlags
   var customFlags = '--nocrankshaft --noopt'
@@ -219,8 +197,8 @@ function canaryGetOptions (url, args, parent) {
   return parent.call(this, url).concat([augmentedFlags || '--js-flags=' + customFlags])
 }
 
-var ChromeCanaryBrowser = function (baseBrowserDecorator, args) {
-  ChromeBrowser.apply(this, arguments)
+var EdgeCanaryBrowser = function (baseBrowserDecorator, args) {
+  EdgeBrowser.apply(this, arguments)
 
   var parentOptions = this._getOptions
   this._getOptions = function (url) {
@@ -228,21 +206,21 @@ var ChromeCanaryBrowser = function (baseBrowserDecorator, args) {
   }
 }
 
-ChromeCanaryBrowser.prototype = {
-  name: 'ChromeCanary',
+EdgeCanaryBrowser.prototype = {
+  name: 'EdgeCanary',
 
   DEFAULT_CMD: {
-    linux: getBin(['google-chrome-canary', 'google-chrome-unstable']),
-    darwin: getChromeDarwin('/Applications/Google Chrome Canary.app/Contents/MacOS/Google Chrome Canary'),
-    win32: getChromeExe('Chrome SxS')
+    linux: getBin(['edge-canary', 'edge-unstable']),
+    darwin: getEdgeDarwin('/Applications/Microsoft Edge Canary.app/Contents/MacOS/Microsoft Edge Canary'),
+    win32: getEdgeExe('Edge SxS')
   },
   ENV_CMD: 'CHROME_CANARY_BIN'
 }
 
-ChromeCanaryBrowser.$inject = ['baseBrowserDecorator', 'args']
+EdgeCanaryBrowser.$inject = ['baseBrowserDecorator', 'args']
 
-var ChromeCanaryHeadlessBrowser = function (baseBrowserDecorator, args) {
-  ChromeCanaryBrowser.apply(this, arguments)
+var EdgeCanaryHeadlessBrowser = function (baseBrowserDecorator, args) {
+  EdgeCanaryBrowser.apply(this, arguments)
 
   var parentOptions = this._getOptions
   this._getOptions = function (url) {
@@ -250,85 +228,26 @@ var ChromeCanaryHeadlessBrowser = function (baseBrowserDecorator, args) {
   }
 }
 
-ChromeCanaryHeadlessBrowser.prototype = {
-  name: 'ChromeCanaryHeadless',
+EdgeCanaryHeadlessBrowser.prototype = {
+  name: 'EdgeCanaryHeadless',
 
   DEFAULT_CMD: {
-    linux: getBin(['google-chrome-canary', 'google-chrome-unstable']),
-    darwin: getChromeDarwin('/Applications/Google Chrome Canary.app/Contents/MacOS/Google Chrome Canary'),
-    win32: getChromeExe('Chrome SxS')
+    linux: getBin(['edge-canary', 'edge-unstable']),
+    darwin: getEdgeDarwin('/Applications/Microsoft Edge Canary.app/Contents/MacOS/Microsoft Edge Canary'),
+    win32: getEdgeExe('Edge SxS')
   },
   ENV_CMD: 'CHROME_CANARY_BIN'
 }
 
-ChromeCanaryHeadlessBrowser.$inject = ['baseBrowserDecorator', 'args']
-
-ChromiumBrowser.prototype = {
-  name: 'Chromium',
-
-  DEFAULT_CMD: {
-    // Try chromium-browser before chromium to avoid conflict with the legacy
-    // chromium-bsu package previously known as 'chromium' in Debian and Ubuntu.
-    linux: getBin(['chromium-browser', 'chromium']),
-    darwin: '/Applications/Chromium.app/Contents/MacOS/Chromium',
-    win32: getChromiumExe()
-  },
-  ENV_CMD: 'CHROMIUM_BIN'
-}
-
-ChromiumBrowser.$inject = ['baseBrowserDecorator', 'args']
-
-var ChromiumHeadlessBrowser = function (baseBrowserDecorator, args) {
-  ChromiumBrowser.apply(this, arguments)
-
-  var parentOptions = this._getOptions
-  this._getOptions = function (url) {
-    return headlessGetOptions.call(this, url, args, parentOptions)
-  }
-}
-
-ChromiumHeadlessBrowser.prototype = {
-  name: 'ChromiumHeadless',
-
-  DEFAULT_CMD: {
-    // Try chromium-browser before chromium to avoid conflict with the legacy
-    // chromium-bsu package previously known as 'chromium' in Debian and Ubuntu.
-    linux: getBin(['chromium-browser', 'chromium']),
-    darwin: '/Applications/Chromium.app/Contents/MacOS/Chromium',
-    win32: getChromiumExe()
-  },
-  ENV_CMD: 'CHROMIUM_BIN'
-}
-
-var DartiumBrowser = function () {
-  ChromeBrowser.apply(this, arguments)
-
-  var checkedFlag = '--checked'
-  var dartFlags = process.env.DART_FLAGS || ''
-  var flags = dartFlags.split(' ')
-  if (flags.indexOf(checkedFlag) === -1) {
-    flags.push(checkedFlag)
-    process.env.DART_FLAGS = flags.join(' ')
-  }
-}
-
-DartiumBrowser.prototype = {
-  name: 'Dartium',
-  DEFAULT_CMD: {},
-  ENV_CMD: 'DARTIUM_BIN'
-}
-
-DartiumBrowser.$inject = ['baseBrowserDecorator', 'args']
+EdgeCanaryHeadlessBrowser.$inject = ['baseBrowserDecorator', 'args']
 
 // PUBLISH DI MODULE
 module.exports = {
-  'launcher:Chrome': ['type', ChromeBrowser],
-  'launcher:ChromeHeadless': ['type', ChromeHeadlessBrowser],
-  'launcher:ChromeCanary': ['type', ChromeCanaryBrowser],
-  'launcher:ChromeCanaryHeadless': ['type', ChromeCanaryHeadlessBrowser],
-  'launcher:Chromium': ['type', ChromiumBrowser],
-  'launcher:ChromiumHeadless': ['type', ChromiumHeadlessBrowser],
-  'launcher:Dartium': ['type', DartiumBrowser]
+  'launcher:Edge': ['type', EdgeBrowser],
+  'launcher:EdgeHeadless': ['type', EdgeHeadlessBrowser],
+  'launcher:EdgeCanary': ['type', EdgeCanaryBrowser],
+  'launcher:EdgeCanaryHeadless': ['type', EdgeCanaryHeadlessBrowser],
+  'launcher:Chromium': ['type', ChromiumBrowser]
 }
 
 module.exports.test = {

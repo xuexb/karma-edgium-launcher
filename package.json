@@ -1,7 +1,7 @@
 {
-  "name": "karma-chrome-launcher",
+  "name": "karma-edgium-launcher",
   "version": "3.1.0",
-  "description": "A Karma plugin. Launcher for Chrome and Chrome Canary.",
+  "description": "A Karma plugin. Launcher for Edge and Edge Canary.",
   "main": "index.js",
   "scripts": {
     "lint": "standard",
@@ -10,12 +10,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/karma-runner/karma-chrome-launcher.git"
+    "url": "git+https://github.com/koddsson/karma-edgium-launcher.git"
   },
   "keywords": [
     "karma-plugin",
     "karma-launcher",
-    "chrome"
+    "edge"
   ],
   "author": "Vojta Jina <vojta.jina@gmail.com>",
   "dependencies": {
@@ -76,5 +76,13 @@
     "Florian-R <florian.r.dev@gmail.com>",
     "J Rob Gant <rgant@alum.wpi.edu>",
     "Jeff Cross <middlefloor@gmail.com>"
-  ]
+  ],
+  "bugs": {
+    "url": "https://github.com/koddsson/karma-edgium-launcher/issues"
+  },
+  "homepage": "https://github.com/koddsson/karma-edgium-launcher#readme",
+  "directories": {
+    "example": "examples",
+    "test": "test"
+  }
 }
